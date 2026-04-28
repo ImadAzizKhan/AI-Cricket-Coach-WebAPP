@@ -13,7 +13,7 @@ app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # --- ESP32 SETUP ---
-ESP32_IP = "192.168.1.100"  # Replace with your ESP32 IP
+ESP32_IP = "000.000.0.100"  # Replace with your ESP32 IP
 UDP_PORT = 4210
 udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
