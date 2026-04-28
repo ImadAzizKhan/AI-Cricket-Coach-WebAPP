@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Cricket Coach: Target Practice</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        body { font-family: -apple-system, sans-serif; background-color: #121212; color: white; margin: 0; padding: 20px; text-align: center; }
+        .card { background-color: #1e1e1e; padding: 20px; border-radius: 12px; margin-bottom: 20px; border-top: 4px solid #FF9800;}
+        h2 { margin-top: 0; color: #FF9800; }
+        .score-board { font-size: 24px; font-weight: bold; margin-bottom: 15px; }
+        select, button { width: 100%; padding: 15px; font-size: 18px; border-radius: 8px; border: none; margin-top: 10px; }
+        select { background-color: #333; color: white; }
+        
+        #readyBtn { background-color: #4CAF50; color: white; font-weight: bold; cursor: pointer; transition: 0.3s;}
+        #readyBtn:disabled { background-color: #888; }
+        
+        .reference-box { background-color: #2c2c2c; padding: 15px; border-radius: 8px; text-align: left; margin: 15px 0; font-size: 15px;}
+        .reference-box ul { padding-left: 20px; margin: 5px 0; }
+        
+        .review-box { display: none; background-color: #333; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .review-title { font-size: 20px; font-weight: bold; margin-bottom: 10px;}
+        .error-list { color: #ff5252; text-align: left; padding-left: 20px; font-size: 16px;}
+        .success-text { color: #69f0ae; font-weight: bold; font-size: 18px;}
+
+        @keyframes shake {
+            0% { transform: translateX(0); } 25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); } 75% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
+        }
+        .shake { animation: shake 0.3s; }
+    </style>
+</head>
+<body>
+
+    <div class="score-board">Total Score: <span id="scoreVal" style="color: #4CAF50;">0</span></div>
+
+    <div class="card" id="mainCard">
+        <h2>Select Practice Shot</h2>
+        
+        <select id="lessonSelect">
+            <option value="Cover Drive">Cover Drive</option>
+            <option value="Front Foot Defensive">Front Foot Defensive</option>
+            <option value="Back Foot Defensive">Back Foot Defensive</option>
+            <option value="Back Foot Punch">Back Foot Punch</option>
+            <option value="Sweep Shot">Sweep Shot</option>
+            <option value="Pull Shot">Pull Shot</option>
+            <option value="Flick Shot">Flick Shot</option>
+        </select>
+
+        <div class="reference-box" id="refBox">
+            <strong>Target Form:</strong>
+            <ul id="focusPoints">
+                <li>Front elbow must be high (>120°)</li>
+                <li>Head positioned close to the bat</li>
+                <li>Front knee bent to lean in</li>
+            </ul>
+        </div>
+        
+        <button id="readyBtn" onclick="startCountdown()">Start Practice (3s Delay)</button>
+
+        <div class="review-box" id="reviewBox">
+            <div class="review-title" id="reviewTitle">Reviewing Shot...</div>
+            <ul class="error-list" id="errorList"></ul>
+            <button onclick="resetLesson()" style="background-color: #FF9800;">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let score = 0;
+
+        // Form requirements for each shot
+        const targets = {
+            "Cover Drive": ["Front elbow must be high (>120°)", "Head positioned close to the bat", "Front knee bent to lean in"],
+            "Front Foot Defensive": ["Bat and pad close together", "High front elbow", "Soft hands (don't push hard)"],
+            "Sweep Shot": ["Drop back knee low to ground", "Extend arms through the sweep"],
+            "Pull Shot": ["Extend arms fully on impact", "Widen your stance for balance"],
+            "Back Foot Defensive": ["Weight back, stand tall", "Play right under your eyes", "Feet relatively close together"],
+            "Back Foot Punch": ["Stand tall in the crease", "High elbows through the shot", "Meet the ball on the rise"],
+            "Flick Shot": ["Straight front leg to pivot", "Rolling the wrists on impact", "Arms nicely extended"]
+        };
+
+        // When user selects a new shot
+        document.getElementById('lessonSelect').addEventListener('change', function(e) {
+            const shot = e.target.value;
+            socket.emit('set_target_shot', { shot: shot });
+            
+            // Update the bullet points on the screen
+            const list = document.getElementById('focusPoints');
+            list.innerHTML = "";
+            targets[shot].forEach(point => {
+                list.innerHTML += `<li>${point}</li>`;
+            });
+        });
+
+        // The Countdown Logic
+        function startCountdown() {
+            const btn = document.getElementById('readyBtn');
+            const select = document.getElementById('lessonSelect');
+            let countdown = 3; // 3 seconds to get ready
+            
+            btn.disabled = true;
+            select.disabled = true;
+
+            const timer = setInterval(() => {
+                btn.innerText = `Recording in... ${countdown}`;
+                countdown--;
+
+                if(countdown < 0) {
+                    clearInterval(timer);
+                    btn.innerText = "Evaluating Frame!";
+                    // Tell Python to grade the very next frame it sees!
+                    socket.emit('trigger_evaluation'); 
+                }
+            }, 1000);
+        }
+
+        // When Python finishes grading the frame
+        socket.on('shot_review', function(data) {
+            const reviewBox = document.getElementById('reviewBox');
+            const title = document.getElementById('reviewTitle');
+            const errorList = document.getElementById('errorList');
+            const btn = document.getElementById('readyBtn');
+            
+            btn.style.display = 'none'; // Hide ready button
+            reviewBox.style.display = 'block'; // Show review
+            errorList.innerHTML = "";
+
+            if (data.status === 'success') {
+                score += data.points;
+                document.getElementById('scoreVal').innerText = score;
+                title.innerHTML = `<span class="success-text">Perfect Form! +${data.points}</span>`;
+            } else {
+                title.innerHTML = `<span style="color:#ff5252;">Form Errors Detected:</span>`;
+                data.errors.forEach(err => {
+                    errorList.innerHTML += `<li>${err}</li>`;
+                });
+                triggerVibration(); // Vibrate phone for errors
+            }
+        });
+
+        function triggerVibration() {
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+            const card = document.getElementById('mainCard');
+            card.classList.remove('shake');
+            void card.offsetWidth;
+            card.classList.add('shake');
+        }
+
+        function resetLesson() {
+            document.getElementById('reviewBox').style.display = 'none';
+            const btn = document.getElementById('readyBtn');
+            btn.style.display = 'block';
+            btn.disabled = false;
+            btn.innerText = "Start Practice (3s Delay)";
+            document.getElementById('lessonSelect').disabled = false;
+        }
+    </script>
+</body>
+</html>
