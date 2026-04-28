@@ -50,6 +50,9 @@
         </select>
 
         <div class="reference-box" id="refBox">
+            <div style="background-color: #222; border-radius: 8px; margin-top: 15px; padding: 10px;">
+            <canvas id="skeletonCanvas" width="200" height="250"></canvas>
+        </div>
             <strong>Target Form:</strong>
             <ul id="focusPoints">
                 <li>Front elbow must be high (>120°)</li>
@@ -94,6 +97,61 @@
                 list.innerHTML += `<li>${point}</li>`;
             });
         });
+        function drawGhostSkeleton(shot) {
+            const canvas = document.getElementById('skeletonCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawing
+            
+            // Default styling
+            ctx.strokeStyle = "rgba(0, 255, 255, 0.5)"; // Cyan transparent
+            ctx.lineWidth = 4;
+            ctx.lineCap = "round";
+            
+            // Base coordinates (Center of canvas)
+            let head = {x: 100, y: 50};
+            let shoulder = {x: 100, y: 80};
+            let frontHip = {x: 90, y: 150}; let backHip = {x: 110, y: 150};
+            let frontKnee, frontFoot, backKnee, backFoot, frontElbow, frontWrist;
+
+            // Modify posture based on shot
+            if(shot === "Cover Drive") {
+                frontKnee = {x: 50, y: 180}; frontFoot = {x: 40, y: 230}; // Leaning forward
+                backKnee = {x: 120, y: 190}; backFoot = {x: 130, y: 230}; // Straight back leg
+                frontElbow = {x: 60, y: 60}; frontWrist = {x: 40, y: 120}; // High elbow
+            } 
+            else if(shot === "Pull Shot") {
+                frontKnee = {x: 80, y: 190}; frontFoot = {x: 70, y: 230}; // Upright
+                backKnee = {x: 140, y: 190}; backFoot = {x: 150, y: 230}; // Weight back
+                frontElbow = {x: 130, y: 70}; frontWrist = {x: 160, y: 60}; // Horizontal bat
+            }
+            else { // Default Stance
+                frontKnee = {x: 90, y: 190}; frontFoot = {x: 90, y: 230}; 
+                backKnee = {x: 110, y: 190}; backFoot = {x: 110, y: 230};
+                frontElbow = {x: 80, y: 100}; frontWrist = {x: 80, y: 140};
+            }
+
+            // Function to draw bones
+            function drawLine(p1, p2) {
+                ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+            }
+
+            // Draw Skeleton
+            ctx.beginPath(); ctx.arc(head.x, head.y, 15, 0, Math.PI*2); ctx.stroke(); // Head
+            drawLine(head, shoulder); // Spine
+            drawLine(shoulder, frontHip); drawLine(shoulder, backHip); // Torso
+            drawLine(frontHip, frontKnee); drawLine(frontKnee, frontFoot); // Front Leg
+            drawLine(backHip, backKnee); drawLine(backKnee, backFoot); // Back Leg
+            drawLine(shoulder, frontElbow); drawLine(frontElbow, frontWrist); // Front Arm
+        }
+
+        // Call this inside your lessonSelect event listener to update it dynamically
+        document.getElementById('lessonSelect').addEventListener('change', function(e) {
+            drawGhostSkeleton(e.target.value);
+            // ... rest of your existing change event code ...
+        });
+
+        // Draw initial skeleton on load
+        drawGhostSkeleton("Cover Drive");
 
         // The Countdown Logic
         function startCountdown() {
