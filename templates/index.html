@@ -41,12 +41,12 @@
         
         <select id="lessonSelect">
             <option value="Cover Drive">Cover Drive</option>
-            <option value="Front Foot Defensive">Front Foot Defensive</option>
-            <option value="Back Foot Defensive">Back Foot Defensive</option>
-            <option value="Back Foot Punch">Back Foot Punch</option>
-            <option value="Sweep Shot">Sweep Shot</option>
-            <option value="Pull Shot">Pull Shot</option>
-            <option value="Flick Shot">Flick Shot</option>
+            <option value="Defensive">Defensive</option>
+            <option value="Down The Wicket">Down The Wicket</option>
+            <option value="Lofted Legside">Lofted Legside</option>
+            <option value="Lofted Offside">Lofted Offside</option>
+            <option value="Sweep">Sweep</option>
+            <option value="Upper Cut">Upper Cut</option>
         </select>
 
         <div class="reference-box" id="refBox">
@@ -74,15 +74,15 @@
         const socket = io();
         let score = 0;
 
-        // Form requirements for each shot
+        // FIXED: Exact match for the 7 CricShot10k classes
         const targets = {
             "Cover Drive": ["Front elbow must be high (>120°)", "Head positioned close to the bat", "Front knee bent to lean in"],
-            "Front Foot Defensive": ["Bat and pad close together", "High front elbow", "Soft hands (don't push hard)"],
-            "Sweep Shot": ["Drop back knee low to ground", "Extend arms through the sweep"],
-            "Pull Shot": ["Extend arms fully on impact", "Widen your stance for balance"],
-            "Back Foot Defensive": ["Weight back, stand tall", "Play right under your eyes", "Feet relatively close together"],
-            "Back Foot Punch": ["Stand tall in the crease", "High elbows through the shot", "Meet the ball on the rise"],
-            "Flick Shot": ["Straight front leg to pivot", "Rolling the wrists on impact", "Arms nicely extended"]
+            "Defensive": ["Bat and pad close together", "Soft hands (don't push hard)", "Play right under your eyes"],
+            "Down The Wicket": ["Take a big stride to the pitch of the ball", "Keep your head still while advancing"],
+            "Lofted Legside": ["Clear your front leg", "Follow through completely with bottom hand"],
+            "Lofted Offside": ["Fully extend arms to get under the ball", "Keep a strong base, bend front knee"],
+            "Sweep": ["Drop back knee low to ground", "Extend arms through the sweep"],
+            "Upper Cut": ["Wait for it! Play it late over your shoulder", "Guide the ball, don't slash hard"]
         };
 
         // When user selects a new shot
@@ -97,32 +97,30 @@
                 list.innerHTML += `<li>${point}</li>`;
             });
         });
+
         function drawGhostSkeleton(shot) {
             const canvas = document.getElementById('skeletonCanvas');
             const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawing
+            ctx.clearRect(0, 0, canvas.width, canvas.height); 
             
-            // Default styling
-            ctx.strokeStyle = "rgba(0, 255, 255, 0.5)"; // Cyan transparent
+            ctx.strokeStyle = "rgba(0, 255, 255, 0.5)"; 
             ctx.lineWidth = 4;
             ctx.lineCap = "round";
             
-            // Base coordinates (Center of canvas)
             let head = {x: 100, y: 50};
             let shoulder = {x: 100, y: 80};
             let frontHip = {x: 90, y: 150}; let backHip = {x: 110, y: 150};
             let frontKnee, frontFoot, backKnee, backFoot, frontElbow, frontWrist;
 
-            // Modify posture based on shot
             if(shot === "Cover Drive") {
-                frontKnee = {x: 50, y: 180}; frontFoot = {x: 40, y: 230}; // Leaning forward
-                backKnee = {x: 120, y: 190}; backFoot = {x: 130, y: 230}; // Straight back leg
-                frontElbow = {x: 60, y: 60}; frontWrist = {x: 40, y: 120}; // High elbow
+                frontKnee = {x: 50, y: 180}; frontFoot = {x: 40, y: 230}; 
+                backKnee = {x: 120, y: 190}; backFoot = {x: 130, y: 230}; 
+                frontElbow = {x: 60, y: 60}; frontWrist = {x: 40, y: 120}; 
             } 
-            else if(shot === "Pull Shot") {
-                frontKnee = {x: 80, y: 190}; frontFoot = {x: 70, y: 230}; // Upright
-                backKnee = {x: 140, y: 190}; backFoot = {x: 150, y: 230}; // Weight back
-                frontElbow = {x: 130, y: 70}; frontWrist = {x: 160, y: 60}; // Horizontal bat
+            else if(shot === "Sweep") { // Updated name for ghost skeleton
+                frontKnee = {x: 50, y: 230}; frontFoot = {x: 40, y: 230}; // Kneeling
+                backKnee = {x: 140, y: 230}; backFoot = {x: 160, y: 230}; 
+                frontElbow = {x: 130, y: 100}; frontWrist = {x: 160, y: 100}; // Horizontal sweep
             }
             else { // Default Stance
                 frontKnee = {x: 90, y: 190}; frontFoot = {x: 90, y: 230}; 
@@ -130,34 +128,29 @@
                 frontElbow = {x: 80, y: 100}; frontWrist = {x: 80, y: 140};
             }
 
-            // Function to draw bones
             function drawLine(p1, p2) {
                 ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
             }
 
-            // Draw Skeleton
-            ctx.beginPath(); ctx.arc(head.x, head.y, 15, 0, Math.PI*2); ctx.stroke(); // Head
-            drawLine(head, shoulder); // Spine
-            drawLine(shoulder, frontHip); drawLine(shoulder, backHip); // Torso
-            drawLine(frontHip, frontKnee); drawLine(frontKnee, frontFoot); // Front Leg
-            drawLine(backHip, backKnee); drawLine(backKnee, backFoot); // Back Leg
-            drawLine(shoulder, frontElbow); drawLine(frontElbow, frontWrist); // Front Arm
+            ctx.beginPath(); ctx.arc(head.x, head.y, 15, 0, Math.PI*2); ctx.stroke(); 
+            drawLine(head, shoulder); 
+            drawLine(shoulder, frontHip); drawLine(shoulder, backHip); 
+            drawLine(frontHip, frontKnee); drawLine(frontKnee, frontFoot); 
+            drawLine(backHip, backKnee); drawLine(backKnee, backFoot); 
+            drawLine(shoulder, frontElbow); drawLine(frontElbow, frontWrist); 
         }
 
-        // Call this inside your lessonSelect event listener to update it dynamically
         document.getElementById('lessonSelect').addEventListener('change', function(e) {
             drawGhostSkeleton(e.target.value);
-            // ... rest of your existing change event code ...
         });
 
-        // Draw initial skeleton on load
+        // Initialize
         drawGhostSkeleton("Cover Drive");
 
-        // The Countdown Logic
         function startCountdown() {
             const btn = document.getElementById('readyBtn');
             const select = document.getElementById('lessonSelect');
-            let countdown = 3; // 3 seconds to get ready
+            let countdown = 3; 
             
             btn.disabled = true;
             select.disabled = true;
@@ -169,33 +162,33 @@
                 if(countdown < 0) {
                     clearInterval(timer);
                     btn.innerText = "Evaluating Frame!";
-                    // Tell Python to grade the very next frame it sees!
                     socket.emit('trigger_evaluation'); 
                 }
             }, 1000);
         }
 
-        // When Python finishes grading the frame
         socket.on('shot_review', function(data) {
             const reviewBox = document.getElementById('reviewBox');
             const title = document.getElementById('reviewTitle');
             const errorList = document.getElementById('errorList');
             const btn = document.getElementById('readyBtn');
             
-            btn.style.display = 'none'; // Hide ready button
-            reviewBox.style.display = 'block'; // Show review
+            btn.style.display = 'none'; 
+            reviewBox.style.display = 'block'; 
             errorList.innerHTML = "";
 
             if (data.status === 'success') {
                 score += data.points;
                 document.getElementById('scoreVal').innerText = score;
                 title.innerHTML = `<span class="success-text">Perfect Form! +${data.points}</span>`;
+                // Also show AI confidence!
+                errorList.innerHTML += `<li style="color:white;">AI Confidence: ${data.confidence.toFixed(1)}%</li>`;
             } else {
                 title.innerHTML = `<span style="color:#ff5252;">Form Errors Detected:</span>`;
                 data.errors.forEach(err => {
                     errorList.innerHTML += `<li>${err}</li>`;
                 });
-                triggerVibration(); // Vibrate phone for errors
+                triggerVibration(); 
             }
         });
 
@@ -214,6 +207,45 @@
             btn.disabled = false;
             btn.innerText = "Start Practice (3s Delay)";
             document.getElementById('lessonSelect').disabled = false;
+        }
+
+        // --- NATIVE BROWSER VOICE RECOGNITION ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = true; 
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = function() {
+                console.log("Voice Recognition started.");
+            };
+
+            recognition.onresult = function(event) {
+                const last = event.results.length - 1;
+                const command = event.results[last][0].transcript.trim().toLowerCase();
+                console.log("Heard: ", command);
+
+                if (command.includes("start") || command.includes("ready")) {
+                    console.log("Voice Command: Starting practice...");
+                    // Give visual feedback via button text
+                    document.getElementById('readyBtn').innerText = "🎤 Voice Activated!";
+                    startCountdown(); 
+                } 
+                else if (command.includes("next") || command.includes("reset") || command.includes("again")) {
+                    console.log("Voice Command: Resetting...");
+                    resetLesson();
+                }
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Speech Recognition Error: ", event.error);
+            };
+
+            recognition.start();
+        } else {
+            console.warn("Speech Recognition API not supported in this browser.");
         }
     </script>
 </body>
