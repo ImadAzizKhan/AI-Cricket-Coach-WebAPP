@@ -1,0 +1,11 @@
+flask
+flask-socketio
+opencv-python
+mediapipe
+numpy
+pandas
+xgboost
+scikit-learn
+optuna
+imbalanced-learn
+joblib
