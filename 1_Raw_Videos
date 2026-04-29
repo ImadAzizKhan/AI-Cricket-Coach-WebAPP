@@ -1,1 +1,5 @@
-
+Make It a folder with this name "1_Raw_Videos" and extract files from following link:
+https://drive.google.com/drive/folders/13dQHHW8v9gt_jIssQ5PTrJToWGUXvZey
+This dataset was taken with thanks from the following repository:
+https://github.com/Dihan69/CricShot10k/tree/main
+Use fix_folders.py since folders are double when files are extracted.
