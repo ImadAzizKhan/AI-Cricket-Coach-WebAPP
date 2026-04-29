@@ -41,8 +41,8 @@ import time
 # ─────────────────────────────────────────────
 #  CONFIGURE THESE PATHS
 # ─────────────────────────────────────────────
-DATASET_PATH = r"D:\Personal Projects\VR Bat\cricket-pose-detection-analysis-main\CricShot10k_Dataset\CricShot10k_ Shot Dataset\Cricket_AI_Training\1_Raw_Videos"
-CSV_FILE     = r"D:\Personal Projects\VR Bat\cricket-pose-detection-analysis-main\CricShot10k_Dataset\CricShot10k_ Shot Dataset\Cricket_AI_Training\3_Extracted_Data\training_data.csv"
+DATASET_PATH = r"D:\Path to Raw Videos folder\1_Raw_Videos" #Add your Own Path
+CSV_FILE     = r"D:\Path to Raw training data.csv\3_Extracted_Data\training_data.csv" #Add your Own Path
 SCREENSHOT_DIR = os.path.expanduser("~/Desktop")   # where S-key screenshots go
 # ─────────────────────────────────────────────
 
