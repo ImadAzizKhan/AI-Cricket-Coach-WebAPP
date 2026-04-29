@@ -49,9 +49,9 @@ except ImportError:
 # ─────────────────────────────────────────────
 #  CONFIGURE THESE PATHS
 # ─────────────────────────────────────────────
-CSV_FILE   = r"D:\Personal Projects\VR Bat\cricket-pose-detection-analysis-main\CricShot10k_Dataset\CricShot10k_ Shot Dataset\Cricket_AI_Training\3_Extracted_Data\training_data.csv"
-MODEL_FILE = r"D:\Personal Projects\VR Bat\cricket-pose-detection-analysis-main\CricShot10k_Dataset\CricShot10k_ Shot Dataset\Cricket_AI_Training\4_Model_Training\cricket_ai_model.pkl"
-META_FILE  = r"D:\Personal Projects\VR Bat\cricket-pose-detection-analysis-main\CricShot10k_Dataset\CricShot10k_ Shot Dataset\Cricket_AI_Training\4_Model_Training\model_meta.json"
+CSV_FILE   = r"D:\#Add your Own Path\3_Extracted_Data\training_data.csv"
+MODEL_FILE = r"D:\#Add your Own Path\4_Model_Training\cricket_ai_model.pkl"
+META_FILE  = r"D:\#Add your Own Path\4_Model_Training\model_meta.json"
 # ─────────────────────────────────────────────
 
 OPTUNA_TRIALS    = 60    # More = better tuning, but slower. 60 takes ~5 min on CPU.
