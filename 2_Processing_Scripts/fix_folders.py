@@ -1,8 +1,10 @@
+#RUn this code if there is a double folder for each shot
+
 import os
 import shutil
 
 # Your exact path to the Raw Videos folder
-BASE_PATH = r"D:\Personal Projects\VR Bat\cricket-pose-detection-analysis-main\CricShot10k_Dataset\CricShot10k_ Shot Dataset\Cricket_AI_Training\1_Raw_Videos"
+BASE_PATH = r"D:\Path To extracted folders\1_Raw_Videos" #Add your Own Path
 
 for class_folder in os.listdir(BASE_PATH):
     class_dir = os.path.join(BASE_PATH, class_folder)
